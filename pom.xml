@@ -11,8 +11,8 @@
     <groupId>io.poststead</groupId>
     <artifactId>poststeadpostservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>poststeadpostservice</name>
-    <description>poststeadpostservice</description>
+    <name>PostSteadPostService</name>
+    <description>PostSteadPostService</description>
     <properties>
         <java.version>17</java.version>
     </properties>
