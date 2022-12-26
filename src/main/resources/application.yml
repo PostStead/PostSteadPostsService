@@ -14,6 +14,24 @@ spring:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: pR01#ctj(v*d@!ddA
+  rabbitmq:
+    host: ${RABBIT_MQ_HOST:localhost}
+    port: ${RABBIT_MQ_PORT:5672}
+    virtual-host: ${RABBIT_MQ_VIRTUAL_HOST:/}
+    username: ${RABBIT_MQ_USERNAME:rabbitmq}
+    password: ${RABBIT_MQ_PWD:pjk%ss]@o*e0!@N}
+    ssl:
+      enabled: ${RABBIT_MQ_SECURED:false}
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: ${RABBIT_MQ_RETRY:5}
+        acknowledge-mode: manual
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
 
 server:
   port: 8082
