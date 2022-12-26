@@ -28,10 +28,6 @@ spring:
           enabled: true
           max-attempts: ${RABBIT_MQ_RETRY:5}
         acknowledge-mode: manual
-  cloud:
-    openfeign:
-      okhttp:
-        enabled: true
 
 server:
   port: 8082
