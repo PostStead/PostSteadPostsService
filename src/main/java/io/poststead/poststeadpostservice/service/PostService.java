@@ -1,6 +1,6 @@
 package io.poststead.poststeadpostservice.service;
 
-import io.poststead.poststeadpostservice.model.Post;
+import io.poststead.poststeadpostservice.model.PostEntity;
 import io.poststead.poststeadpostservice.model.dto.PostDto;
 import io.poststead.poststeadpostservice.repository.PostRepository;
 import lombok.AllArgsConstructor;
@@ -16,26 +16,26 @@ public class PostService {
     private PostRepository postRepository;
 
     public PostDto createPost(PostDto postDto) {
-        Post savedPost = postRepository.save(Post.builder()
+        PostEntity savedPostEntity = postRepository.save(PostEntity.builder()
                         .content(postDto.getContent())
                         .createdBy(postDto.getCreatedBy())
                 .build());
         return PostDto.builder()
-                .id(savedPost.getId())
-                .content(savedPost.getContent())
-                .createdBy(savedPost.getCreatedBy())
+                .id(savedPostEntity.getId())
+                .content(savedPostEntity.getContent())
+                .createdBy(savedPostEntity.getCreatedBy())
                 .build();
     }
 
-    public Page<Post> fetchPosts(String username) {
+    public Page<PostEntity> fetchPosts(String username) {
         Pageable pageRequest = PageRequest.of(
                 0,
                 25,
                 Sort.by(Sort.Direction.ASC, "createdBy")
         );
-        List<Post> postList = postRepository.getPostsByCreatedBy(username);
+        List<PostEntity> postEntityList = postRepository.getPostsByCreatedBy(username);
         Long postsNumber = postRepository.countByCreatedBy(username);
-        return new PageImpl<>(postList, pageRequest, postsNumber);
+        return new PageImpl<>(postEntityList, pageRequest, postsNumber);
     }
 
 }

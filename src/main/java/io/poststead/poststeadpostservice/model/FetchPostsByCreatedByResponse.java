@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class FetchPostsByCreatedByResponse {
 
-    private List<Post> data;
+    private List<PostEntity> data;
 
     private Pagination pagination;
 

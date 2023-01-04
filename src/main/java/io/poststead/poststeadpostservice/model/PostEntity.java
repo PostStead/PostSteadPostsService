@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Post {
+public class PostEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
