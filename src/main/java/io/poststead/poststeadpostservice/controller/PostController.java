@@ -17,6 +17,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("api/posts")
 @AllArgsConstructor
+@CrossOrigin("*")
 public class PostController {
 
     private PostService postService;
