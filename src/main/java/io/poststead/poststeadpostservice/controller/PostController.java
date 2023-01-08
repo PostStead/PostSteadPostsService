@@ -1,18 +1,18 @@
 package io.poststead.poststeadpostservice.controller;
 
+import io.poststead.poststeadpostservice.model.CreatePostRequest;
 import io.poststead.poststeadpostservice.model.FetchPostsByCreatedByResponse;
-import io.poststead.poststeadpostservice.model.Pagination;
-import io.poststead.poststeadpostservice.model.PostEntity;
 import io.poststead.poststeadpostservice.model.dto.PostDto;
 import io.poststead.poststeadpostservice.service.PostService;
 import io.poststead.poststeadpostservice.utility.PostConstants;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,51 +21,63 @@ import java.util.UUID;
 @CrossOrigin(origins = "http://localhost:4200")
 public class PostController {
 
+    private final RabbitTemplate rabbitTemplate;
     private PostService postService;
 
     @PreAuthorize("principal.username == #username")
     @PostMapping(value = "/{username}")
-    ResponseEntity<PostDto> createPost(
-            @PathVariable String username,
-            @RequestBody PostDto postDto) {
-        PostDto savedPost = postService.createPost(postDto);
-        return ResponseEntity.created(URI.create(
-                PostConstants.GET_POST_ROUTE + username + "/" + savedPost.getId()))
-                .body(savedPost);
+    ResponseEntity<PostDto> createPost(@PathVariable String username, @RequestBody CreatePostRequest requestBody) {
+        PostDto savedPost = postService.createPost(requestBody, username);
+        ResponseEntity<PostDto> response = ResponseEntity.created(
+                URI.create(PostConstants.CREATE_POST_ROUTE + username + "/" + savedPost.getId()))
+            .body(savedPost);
+        sendRabbitMessage(response.toString());
+        return response;
     }
 
     @GetMapping(value = "/{username}")
-    ResponseEntity<FetchPostsByCreatedByResponse> fetchUserPosts(@PathVariable String username) {
-        Page<PostEntity> postPage = postService.fetchPosts(username);
-        return ResponseEntity.ok(FetchPostsByCreatedByResponse.builder()
-                .data(postPage.stream().toList())
-                .pagination(Pagination.builder()
-                        .limit(postPage.getSize())
-                        .page(postPage.getNumber())
-                        .totalItems(postPage.getTotalElements())
-                        .hasNext(postPage.hasNext())
-                        .build())
-                .build());
+    ResponseEntity<FetchPostsByCreatedByResponse> getAllPostsByUsername(@PathVariable String username) {
+        List<PostDto> postEntityList = postService.fetchPostsByCreatedBy(username);
+        ResponseEntity<FetchPostsByCreatedByResponse> response = ResponseEntity.ok(
+            FetchPostsByCreatedByResponse.builder()
+                .data(postEntityList)
+                .build()
+        );
+        sendRabbitMessage(response.toString());
+        return response;
     }
 
     @GetMapping(value = "post/{postId}")
-    ResponseEntity<PostDto> fetchPostById(@PathVariable UUID postId) {
-        return ResponseEntity.ok(postService.fetchPostById(postId));
+    ResponseEntity<PostDto> getPostById(@PathVariable UUID postId) {
+        ResponseEntity<PostDto> response = ResponseEntity.ok(postService.fetchPostById(postId));
+        sendRabbitMessage(response.toString());
+        return response;
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping(value = "/getAll")
-    ResponseEntity<FetchPostsByCreatedByResponse> fetchAllPosts() {
-        Page<PostEntity> postPage = postService.fetchAllPosts();
-        return ResponseEntity.ok(FetchPostsByCreatedByResponse.builder()
-                .data(postPage.stream().toList())
-                .pagination(Pagination.builder()
-                        .limit(postPage.getSize())
-                        .page(postPage.getNumber())
-                        .totalItems(postPage.getTotalElements())
-                        .hasNext(postPage.hasNext())
-                        .build())
-                .build());
+    ResponseEntity<FetchPostsByCreatedByResponse> getAllPosts() {
+        List<PostDto> postEntityList = postService.fetchAllPosts();
+        ResponseEntity<FetchPostsByCreatedByResponse> response = ResponseEntity.ok(
+            FetchPostsByCreatedByResponse.builder()
+                .data(postEntityList)
+                .build()
+        );
+        sendRabbitMessage(response.toString());
+        return response;
+    }
+
+    @PreAuthorize("principal.username == #username")
+    @DeleteMapping(value = "/delete/{username}/{postId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String username, @PathVariable UUID postId) {
+        postService.deletePostById(postId);
+        ResponseEntity<Void> result = ResponseEntity.noContent().build();
+        sendRabbitMessage(result.toString());
+        return result;
+    }
+
+    private void sendRabbitMessage(String event) {
+        rabbitTemplate.convertAndSend("io.poststead.exchange", "io.poststead.audit", event);
     }
 
 }

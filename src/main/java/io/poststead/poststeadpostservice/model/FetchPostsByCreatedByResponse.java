@@ -1,5 +1,6 @@
 package io.poststead.poststeadpostservice.model;
 
+import io.poststead.poststeadpostservice.model.dto.PostDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 public class FetchPostsByCreatedByResponse {
 
-    private List<PostEntity> data;
-
-    private Pagination pagination;
+    private List<PostDto> data;
 
 }

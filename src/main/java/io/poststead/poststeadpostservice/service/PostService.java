@@ -1,10 +1,12 @@
 package io.poststead.poststeadpostservice.service;
 
+import io.poststead.poststeadpostservice.exception.user_exception.PostNotFoundException;
+import io.poststead.poststeadpostservice.model.CreatePostRequest;
 import io.poststead.poststeadpostservice.model.PostEntity;
 import io.poststead.poststeadpostservice.model.dto.PostDto;
 import io.poststead.poststeadpostservice.repository.PostRepository;
+import io.poststead.poststeadpostservice.utility.PostConstants;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,45 +18,53 @@ public class PostService {
 
     private PostRepository postRepository;
 
-    public PostDto createPost(PostDto postDto) {
-        PostEntity savedPostEntity = postRepository.save(PostEntity.builder()
-                .content(postDto.getContent())
-                .createdBy(postDto.getCreatedBy())
-                .build());
-        return PostDto.builder()
-                .id(savedPostEntity.getId())
-                .content(savedPostEntity.getContent())
-                .createdBy(savedPostEntity.getCreatedBy())
-                .build();
+    public PostDto createPost(CreatePostRequest createPostRequest, String username) {
+        PostEntity savedPostEntity = postRepository.save(mapToSavePostEntity(createPostRequest, username));
+        savedPostEntity.setUrl(PostConstants.CREATE_POST_ROUTE + savedPostEntity.getCreatedBy() + "/" +
+            savedPostEntity.getId());
+        return mapToPostDto(postRepository.save(savedPostEntity));
     }
 
-    public Page<PostEntity> fetchPosts(String username) {
-        Pageable pageRequest = PageRequest.of(
-                0,
-                25,
-                Sort.by(Sort.Direction.ASC, "createdBy"));
-        List<PostEntity> postEntityList = postRepository.getPostsByCreatedBy(username);
-        Long postsNumber = postRepository.countByCreatedBy(username);
-        return new PageImpl<>(postEntityList, pageRequest, postsNumber);
+    public List<PostDto> fetchPostsByCreatedBy(String username) {
+        return postRepository.getPostsByCreatedBy(username)
+            .stream()
+            .map(this::mapToPostDto)
+            .toList();
     }
 
     public PostDto fetchPostById(UUID postId) {
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow();
-        return PostDto.builder()
-                .id(postEntity.getId())
-                .content(postEntity.getContent())
-                .createdBy(postEntity.getCreatedBy())
-                .build();
+        PostEntity postEntity = postRepository.findById(postId)
+            .orElseThrow(PostNotFoundException::new);
+        return mapToPostDto(postEntity);
     }
 
-    public Page<PostEntity> fetchAllPosts() {
-        Pageable pageRequest = PageRequest.of(
-                0,
-                25,
-                Sort.by(Sort.Direction.ASC, "createdBy"));
-        List<PostEntity> postEntityList = postRepository.findAll();
-        Long postsNumber = postRepository.count();
-        return new PageImpl<>(postEntityList, pageRequest, postsNumber);
+    public List<PostDto> fetchAllPosts() {
+        return postRepository.findAll()
+            .stream()
+            .map(this::mapToPostDto)
+            .toList();
+    }
+
+    public void deletePostById(UUID id) {
+        postRepository.deleteById(id);
+    }
+
+    private PostDto mapToPostDto(PostEntity postEntity) {
+        return PostDto.builder()
+            .id(postEntity.getId())
+            .title(postEntity.getTitle())
+            .url(postEntity.getUrl())
+            .text(postEntity.getText())
+            .createdBy(postEntity.getCreatedBy())
+            .build();
+    }
+
+    private PostEntity mapToSavePostEntity(CreatePostRequest request, String username) {
+        return PostEntity.builder()
+            .title(request.getTitle())
+            .text(request.getText())
+            .createdBy(username)
+            .build();
     }
 
 }

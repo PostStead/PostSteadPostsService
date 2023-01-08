@@ -9,14 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Pagination {
+public class CreatePostRequest {
 
-    private Integer limit;
+    private String text;
 
-    private Integer page;
-
-    private Long totalItems;
-
-    private Boolean hasNext;
+    private String title;
 
 }

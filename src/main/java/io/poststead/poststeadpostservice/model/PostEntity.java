@@ -22,7 +22,11 @@ public class PostEntity {
     @Column(name = "id", updatable = false, nullable = false)
     UUID id;
 
-    String content;
+    String text;
+
+    String title;
+
+    String url;
 
     String createdBy;
 

@@ -15,7 +15,11 @@ public class PostDto {
 
     private UUID id;
 
-    private String content;
+    private String text;
+
+    private String title;
+
+    private String url;
 
     private String createdBy;
 
