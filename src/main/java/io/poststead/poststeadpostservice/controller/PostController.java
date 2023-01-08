@@ -54,7 +54,7 @@ public class PostController {
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
-    @GetMapping(value = "/")
+    @GetMapping(value = "/getAll")
     ResponseEntity<FetchPostsByCreatedByResponse> fetchAllPosts() {
         Page<PostEntity> postPage = postService.fetchAllPosts();
         return ResponseEntity.ok(FetchPostsByCreatedByResponse.builder()
