@@ -28,6 +28,8 @@ spring:
           enabled: true
           max-attempts: ${RABBIT_MQ_RETRY:5}
         acknowledge-mode: manual
+  application:
+    name: postservice
 
 server:
   port: 8082
