@@ -20,29 +20,27 @@ public class PostService {
 
     public PostDto createPost(CreatePostRequest createPostRequest, String username) {
         PostEntity savedPostEntity = postRepository.save(mapToSavePostEntity(createPostRequest, username));
-        savedPostEntity.setUrl(PostConstants.CREATE_POST_ROUTE + savedPostEntity.getCreatedBy() + "/" +
-            savedPostEntity.getId());
         return mapToPostDto(postRepository.save(savedPostEntity));
     }
 
     public List<PostDto> fetchPostsByCreatedBy(String username) {
         return postRepository.getPostsByCreatedBy(username)
-            .stream()
-            .map(this::mapToPostDto)
-            .toList();
+                .stream()
+                .map(this::mapToPostDto)
+                .toList();
     }
 
     public PostDto fetchPostById(UUID postId) {
         PostEntity postEntity = postRepository.findById(postId)
-            .orElseThrow(PostNotFoundException::new);
+                .orElseThrow(PostNotFoundException::new);
         return mapToPostDto(postEntity);
     }
 
     public List<PostDto> fetchAllPosts() {
         return postRepository.findAll()
-            .stream()
-            .map(this::mapToPostDto)
-            .toList();
+                .stream()
+                .map(this::mapToPostDto)
+                .toList();
     }
 
     public void deletePostById(UUID id) {
@@ -51,20 +49,21 @@ public class PostService {
 
     private PostDto mapToPostDto(PostEntity postEntity) {
         return PostDto.builder()
-            .id(postEntity.getId())
-            .title(postEntity.getTitle())
-            .url(postEntity.getUrl())
-            .text(postEntity.getText())
-            .createdBy(postEntity.getCreatedBy())
-            .build();
+                .id(postEntity.getId())
+                .title(postEntity.getTitle())
+                .url(postEntity.getUrl())
+                .text(postEntity.getText())
+                .createdBy(postEntity.getCreatedBy())
+                .build();
     }
 
     private PostEntity mapToSavePostEntity(CreatePostRequest request, String username) {
         return PostEntity.builder()
-            .title(request.getTitle())
-            .text(request.getText())
-            .createdBy(username)
-            .build();
+                .title(request.getTitle())
+                .text(request.getText())
+                .url(request.getUrl())
+                .createdBy(username)
+                .build();
     }
 
 }
