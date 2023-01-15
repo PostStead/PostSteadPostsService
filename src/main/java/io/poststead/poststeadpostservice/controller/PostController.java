@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/posts")
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "https://poststead.online")
 public class PostController {
 
     private final RabbitTemplate rabbitTemplate;
@@ -54,7 +54,6 @@ public class PostController {
         return response;
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping(value = "/getAll")
     ResponseEntity<FetchPostsByCreatedByResponse> getAllPosts() {
         List<PostDto> postEntityList = postService.fetchAllPosts();
